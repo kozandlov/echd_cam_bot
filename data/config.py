@@ -1,10 +1,13 @@
+import json
+
 from environs import Env
 
-# Теперь используем вместо библиотеки python-dotenv библиотеку environs
 env = Env()
 env.read_env()
 
-BOT_TOKEN = env.str("BOT_TOKEN")  # Забираем значение типа str
-ADMINS = env.list("ADMINS")  # Тут у нас будет список из админов
-IP = env.str("ip")  # Тоже str, но для айпи адреса хоста
+BOT_TOKEN = env.str("BOT_TOKEN")
+ADMINS = env.list("ADMINS")
+IP = env.str("ip")
+CAMERAS_CONFIG_JSON_FILENAME = env.str("CAMERAS_CONFIG_JSON_FILENAME")
 
+cameras_config: dict = json.load(open(CAMERAS_CONFIG_JSON_FILENAME, "r"))
