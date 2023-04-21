@@ -52,15 +52,6 @@ async def get_camera_names(call: CallbackQuery, callback_data: dict):
     await dp.bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.message_id,
-        # text='\n'.join(
-        #     (
-        #         'Данные по камере',
-        #         '',
-        #         f'url={url}',
-        #         f'login={login}',
-        #         f'password={password}'
-        #     )
-        # ),
         text='\n'.join(
             (
                 f"Выбрана камера {callback_data.get('camera')}, находящаяся по адресу {callback_data.get('address')} в кабинете {callback_data.get('kabinet')}",
