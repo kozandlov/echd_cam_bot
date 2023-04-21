@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import os
 
@@ -42,7 +43,7 @@ async def get_camera_names(call: CallbackQuery, callback_data: dict):
     )
 
 
-@dp.callback_query_handler(cameras_callback_data.filter(function='photo'), is_admin=True)
+@dp.callback_query_handler(cameras_callback_data.filter(function='video'), is_admin=True)
 async def get_camera_video(call: CallbackQuery, callback_data: dict):
     url = cameras_config.get(callback_data.get('address')).get(callback_data.get('kabinet')).get(
         callback_data.get('camera')).get('ip-address')
@@ -63,10 +64,11 @@ async def get_camera_video(call: CallbackQuery, callback_data: dict):
         reply_markup=None
     )
     camera_url = f'rtsp://{login}:{password}@{url}:554/cam/realmonitor?channel=1&subtype=0'
-    await record_video(camera_url=camera_url, callback_data=callback_data)
-    await dp.bot.send_file(
+    asyncio.get_running_loop().create_task(record_video(camera_url=camera_url, callback_data=callback_data))
+    # await record_video(camera_url=camera_url, callback_data=callback_data)
+    await dp.bot.send_document(
         chat_id=call.message.chat.id,
-        file=open(f"{callback_data.get('camera')}.avi", 'rb')
+        document=open(f"{callback_data.get('camera')}.avi", 'rb')
     )
     os.remove(f"{callback_data.get('camera')}.avi")
 
@@ -79,7 +81,7 @@ async def record_video(camera_url: str, callback_data: dict):
     output = cv2.VideoWriter(f"{callback_data.get('camera')}.avi", cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 20,
                              (frame_width, frame_height))
     time_1 = datetime.datetime.now()
-    while datetime.datetime.now() - time_1 > datetime.timedelta(minutes=1):
+    while datetime.datetime.now() - time_1 < datetime.timedelta(minutes=1):
         ret, frame = cap.read()
         if ret == True:
             output.write(frame)
