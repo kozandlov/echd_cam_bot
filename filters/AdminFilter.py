@@ -13,6 +13,7 @@ class AdminFilter(BoundFilter):
         self.is_admin = is_admin
 
     async def check(self, obj):
+        print(obj.from_user.id)
         if isinstance(obj, types.Message):
             if not self.is_admin:
                 return False
