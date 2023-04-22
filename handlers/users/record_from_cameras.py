@@ -65,10 +65,10 @@ async def get_camera_video(call: CallbackQuery, callback_data: dict):
     )
     camera_url = f'rtsp://{login}:{password}@{url}:554/cam/realmonitor?channel=1&subtype=0'
     asyncio.get_running_loop().create_task(record_video(camera_url=camera_url, callback_data=callback_data))
-    # await record_video(camera_url=camera_url, callback_data=callback_data)
-    await dp.bot.send_document(
+    await record_video(camera_url=camera_url, callback_data=callback_data)
+    await dp.bot.send_video(
         chat_id=call.message.chat.id,
-        document=open(f"{callback_data.get('camera')}.avi", 'rb')
+        video=open(f"{callback_data.get('camera')}.avi", 'rb')
     )
     os.remove(f"{callback_data.get('camera')}.avi")
 
