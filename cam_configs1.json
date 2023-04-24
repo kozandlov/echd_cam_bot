@@ -1,0 +1,56 @@
+{
+  "UK1": {
+    "1311": {
+      "cam1": {
+        "ip-address": "10.163.191.201",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      },
+      "cam2": {
+        "ip-address": "10.163.191.202",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      }
+    }
+  },
+  "UK2": {
+    "2303": {
+      "cam1": {
+        "ip-address": "10.163.193.201",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      },
+      "cam2": {
+        "ip-address": "10.163.193.202",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      }
+    },
+    "2304": {
+      "cam1": {
+        "ip-address": "10.163.193.203",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      },
+      "cam2": {
+        "ip-address": "10.163.193.204",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      }
+    }
+  },
+  "UK3": {
+    "3105": {
+      "cam1": {
+        "ip-address": "10.163.195.201",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      },
+      "cam2": {
+        "ip-address": "10.163.195.202",
+        "login": "subaccount",
+        "password": "SubV33324G"
+      }
+    }
+  }
+}
