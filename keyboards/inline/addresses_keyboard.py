@@ -3,27 +3,25 @@ from aiogram.utils.callback_data import CallbackData
 
 from data.config import cameras_config
 
-cameras_callback_data = CallbackData('adresses', 'function', 'address', 'kabinet', 'camera')
+cameras_callback_data = CallbackData('cam_callbacks', 'address', 'kab', 'cam_name')
 
-
-def get_addresses_keyboard(function: str):
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text=address,
-                    callback_data=cameras_callback_data.new(
-                        function=function,
-                        address=address,
-                        kabinet='',
-                        camera=''
-                    )
+addresses_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text=address,
+                callback_data=cameras_callback_data.new(
+                    address=address,
+                    kab='KabNone',
+                    cam_name='None'
                 )
-            ] for address in cameras_config.keys()
-        ]
-    )
+            )
+        ] for address in cameras_config.keys()
+    ]
+)
 
 
+#
 def get_kabinets_keyboard(callback_data: dict):
     return InlineKeyboardMarkup(
         inline_keyboard=[
@@ -31,10 +29,9 @@ def get_kabinets_keyboard(callback_data: dict):
                 InlineKeyboardButton(
                     text=kabinet,
                     callback_data=cameras_callback_data.new(
-                        function=callback_data.get('function'),
                         address=callback_data.get('address'),
-                        kabinet=kabinet,
-                        camera=''
+                        kab=kabinet,
+                        cam_name='CamNone'
                     )
                 )
             ] for kabinet in cameras_config.get(callback_data.get('address')).keys()
@@ -42,6 +39,7 @@ def get_kabinets_keyboard(callback_data: dict):
     )
 
 
+#
 def get_cameras_keyboard(callback_data: dict):
     return InlineKeyboardMarkup(
         inline_keyboard=[
@@ -49,12 +47,11 @@ def get_cameras_keyboard(callback_data: dict):
                 InlineKeyboardButton(
                     text=camera,
                     callback_data=cameras_callback_data.new(
-                        function=callback_data.get('function'),
                         address=callback_data.get('address'),
-                        kabinet=callback_data.get('kabinet'),
-                        camera=camera
+                        kab=callback_data.get('kab'),
+                        cam_name=camera
                     )
                 )
-            ] for camera in cameras_config.get(callback_data.get('address')).get(callback_data.get('kabinet')).keys()
+            ] for camera in cameras_config.get(callback_data.get('address')).get(callback_data.get('kab')).keys()
         ]
     )
