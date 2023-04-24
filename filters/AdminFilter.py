@@ -16,8 +16,8 @@ class AdminFilter(BoundFilter):
         if isinstance(obj, types.Message):
             if not self.is_admin:
                 return False
-            return str(obj.from_user.id) in config.ADMINS
+            return str(obj.chat.id) in config.ADMINS
         if isinstance(obj, types.CallbackQuery):
             if not self.is_admin:
                 return False
-            return str(obj.message.from_user.id) in config.ADMINS
+            return str(obj.message.chat.id) in config.ADMINS

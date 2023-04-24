@@ -3,22 +3,25 @@ from aiogram.utils.callback_data import CallbackData
 
 from data.config import cameras_config
 
-cameras_callback_data = CallbackData('cam_callbacks', 'address', 'kab', 'cam_name')
+cameras_callback_data = CallbackData('cam_callbacks', 'function', 'address', 'kab', 'cam_name')
 
-addresses_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text=address,
-                callback_data=cameras_callback_data.new(
-                    address=address,
-                    kab='KabNone',
-                    cam_name='None'
+
+def get_addresses_keyboard(function: str):
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=address,
+                    callback_data=cameras_callback_data.new(
+                        function=function,
+                        address=address,
+                        kab='KabNone',
+                        cam_name='None'
+                    )
                 )
-            )
-        ] for address in cameras_config.keys()
-    ]
-)
+            ] for address in cameras_config.keys()
+        ]
+    )
 
 
 #
@@ -29,6 +32,7 @@ def get_kabinets_keyboard(callback_data: dict):
                 InlineKeyboardButton(
                     text=kabinet,
                     callback_data=cameras_callback_data.new(
+                        function=callback_data.get('function'),
                         address=callback_data.get('address'),
                         kab=kabinet,
                         cam_name='CamNone'
@@ -47,6 +51,7 @@ def get_cameras_keyboard(callback_data: dict):
                 InlineKeyboardButton(
                     text=camera,
                     callback_data=cameras_callback_data.new(
+                        function=callback_data.get('function'),
                         address=callback_data.get('address'),
                         kab=callback_data.get('kab'),
                         cam_name=camera
