@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery
 
 from data.config import cameras_config
 from filters import GetPhotoFromCam
-from keyboards.inline import get_addresses_keyboard, cameras_callback_data, get_kabinets_keyboard, get_cameras_keyboard
+from keyboards.inline import addresses_keyboard, cameras_callback_data, get_kabinets_keyboard, get_cameras_keyboard
 from loader import dp
 
 
@@ -17,11 +17,11 @@ async def get_photo_from_cam(message: Message):
     )
     await message.answer(
         text='Выберите адрес здания, где установлена камера:',
-        reply_markup=get_addresses_keyboard(function='photo')
+        reply_markup=addresses_keyboard
     )
 
 
-@dp.callback_query_handler(cameras_callback_data.filter(function='photo', kabinet='', camera=''), is_admin=True)
+@dp.callback_query_handler(cameras_callback_data.filter(kab='KabNone'), is_admin=True)
 async def get_kabinets(call: CallbackQuery, callback_data: dict):
     await dp.bot.edit_message_text(
         chat_id=call.message.chat.id,
@@ -31,7 +31,8 @@ async def get_kabinets(call: CallbackQuery, callback_data: dict):
     )
 
 
-@dp.callback_query_handler(cameras_callback_data.filter(function='photo', camera=''), is_admin=True)
+#
+@dp.callback_query_handler(cameras_callback_data.filter(cam_name='CamNone'), is_admin=True)
 async def get_camera_names(call: CallbackQuery, callback_data: dict):
     await dp.bot.edit_message_text(
         chat_id=call.message.chat.id,
@@ -41,20 +42,20 @@ async def get_camera_names(call: CallbackQuery, callback_data: dict):
     )
 
 
-@dp.callback_query_handler(cameras_callback_data.filter(function='photo'), is_admin=True)
+@dp.callback_query_handler(cameras_callback_data.filter(), is_admin=True)
 async def get_camera_photo(call: CallbackQuery, callback_data: dict):
-    url = cameras_config.get(callback_data.get('address')).get(callback_data.get('kabinet')).get(
-        callback_data.get('camera')).get('ip-address')
-    login = cameras_config.get(callback_data.get('address')).get(callback_data.get('kabinet')).get(
-        callback_data.get('camera')).get('login')
-    password = cameras_config.get(callback_data.get('address')).get(callback_data.get('kabinet')).get(
-        callback_data.get('camera')).get('password')
+    url = cameras_config.get(callback_data.get('address')).get(callback_data.get('kab')).get(
+        callback_data.get('cam_name')).get('ip-address')
+    login = cameras_config.get(callback_data.get('address')).get(callback_data.get('kab')).get(
+        callback_data.get('cam_name')).get('login')
+    password = cameras_config.get(callback_data.get('address')).get(callback_data.get('kab')).get(
+        callback_data.get('cam_name')).get('password')
     await dp.bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.message_id,
         text='\n'.join(
             (
-                f"Выбрана камера {callback_data.get('camera')}, находящаяся по адресу {callback_data.get('address')} в кабинете {callback_data.get('kabinet')}",
+                f"Выбрана камера {callback_data.get('cam_name')}, находящаяся по адресу {callback_data.get('address')} в кабинете {callback_data.get('kab')}",
                 '',
                 'Следующим сообщением вы получите фото с этой камеры'
             )
