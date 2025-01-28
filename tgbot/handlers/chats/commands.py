@@ -17,10 +17,11 @@ async def start_command(message: Message, bot: Bot, state: FSMContext):
         chat_id=message.chat.id,
         message_id=message.message_id
     )
-    await bot.delete_message(
-        chat_id=message.chat.id,
-        message_id=(await state.get_data()).get('edited_message')
-    )
+    if (await state.get_data()).get('edited_message'):
+        await bot.delete_message(
+            chat_id=message.chat.id,
+            message_id=(await state.get_data()).get('edited_message')
+        )
     await state.clear()
     await set_chat_commands(
         chat_id=message.chat.id,
@@ -41,7 +42,7 @@ async def add_camera(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(AddCameraState.get_building)
     await state.set_data(
         {
-            'edited_message': edited_message
+            'edited_message': edited_message.message_id
         }
     )
 
@@ -59,7 +60,7 @@ async def delete_camera(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(DeleteCameraState.get_building)
     await state.set_data(
         {
-            'edited_message': edited_message
+            'edited_message': edited_message.message_id
         }
     )
 
@@ -77,6 +78,6 @@ async def get_photo(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(GetPhotoState.get_building)
     await state.set_data(
         {
-            'edited_message': edited_message
+            'edited_message': edited_message.message_id
         }
     )
