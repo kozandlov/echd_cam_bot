@@ -1,11 +1,12 @@
 from aiogram import Router, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+from magic_filter import F
 
 from ... import config
-from ...config import Building
+from ...config import Building, Camera
 from ...keyboards import get_cameras_for_building_keyboard, GetBuildingCallBack, get_approve_add_keyboard, \
-    ApproveCallback
+    ApproveCallback, ApproveAction
 from ...states import AddCameraState, DeleteCameraState
 
 cameras_router = Router()
@@ -176,12 +177,43 @@ async def get_password_for_new_camera(message: Message, bot: Bot, state: FSMCont
     )
 
 
-@cameras_router.callback_query(AddCameraState.finish, ApproveCallback)
+@cameras_router.callback_query(AddCameraState.finish, ApproveCallback.filter(F.action == ApproveAction.approve))
 async def get_approval_for_new_camera(call: CallbackQuery,
                                       state: FSMContext,
                                       callback_data: ApproveCallback,
                                       bot: Bot):
-    pass
+    building_address = (await state.get_data()).get('building_address')
+    building = [building for building in config.buildings if building.address == building_address][0]
+    camera = Camera(
+        address=building_address,
+        name=(await state.get_data()).get('camera_name'),
+        ip_address=(await state.get_data()).get('ip'),
+        login=(await state.get_data()).get('login'),
+        password=(await state.get_data()).get('password'),
+    )
+    camera.save_to_conf()
+    building.cameras.append(
+        camera
+    )
+    await bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text='Данные успешно сохранены',
+        reply_markup=None
+    )
+    await state.clear()
+
+
+@cameras_router.callback_query(AddCameraState.finish, ApproveCallback.filter(F.action == ApproveAction.decline))
+async def get_decline_for_new_camera(call: CallbackQuery,
+                                     state: FSMContext,
+                                     callback_data: ApproveCallback,
+                                     bot: Bot):
+    await bot.delete_message(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id
+    )
+    await state.clear()
 
 
 @cameras_router.message(DeleteCameraState.get_building)

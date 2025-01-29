@@ -12,10 +12,11 @@ class TgBot:
     @staticmethod
     def from_env(env: Env):
         token = env.str("BOT_TOKEN")
-        admin_ids = env.list("ADMINS", subcast=str)
-        return TgBot(token=token,
-                     admin_ids=admin_ids
-                     )
+        admin_ids = env.list("ADMINS")
+        return TgBot(
+            token=token,
+            admin_ids=admin_ids
+        )
 
 
 @dataclass
@@ -64,7 +65,7 @@ class Building:
         result = []
         cameras = Camera.from_conf()
         for camera in cameras:
-            if camera.address not in cameras:
+            if camera.address not in [building.address for building in result]:
                 result.append(
                     Building(
                         address=camera.address,
@@ -72,9 +73,9 @@ class Building:
                     )
                 )
             else:
-                for address in result:
-                    if camera.address == address.address:
-                        address.cameras.append(camera)
+                for building in result:
+                    if camera.address == building.address:
+                        building.cameras.append(camera)
         return result
 
 
