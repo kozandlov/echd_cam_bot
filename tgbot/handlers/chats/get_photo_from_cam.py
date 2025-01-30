@@ -58,4 +58,5 @@ async def get_camera_for_photo_from_cam(call: CallbackQuery,
         chat_id=call.message.chat.id,
         photo=FSInputFile('image.jpg')
     )
+    os.remove('image.jpg')
     await state.clear()
