@@ -319,9 +319,9 @@ async def get_camera_approve_for_delete_camera(call: CallbackQuery,
         building = [building for building in config.buildings if building.address == building_address][0]
         camera = [camera for camera in building.cameras if camera.name == camera_name][0]
         camera.delete_from_conf()
+        building.cameras.remove(camera)
         if len(building.cameras) == 0:
             config.buildings.remove(building)
-        building.cameras.remove(camera)
         await bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
