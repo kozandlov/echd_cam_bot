@@ -37,7 +37,7 @@ async def get_address_for_new_camera(message: Message, bot: Bot, state: FSMConte
     )
 
 
-@cameras_router.callback_query(AddCameraState.get_building, GetBuildingCallBack)
+@cameras_router.callback_query(AddCameraState.get_building, GetBuildingCallBack.filter())
 async def get_address_for_new_camera(call: CallbackQuery,
                                      state: FSMContext,
                                      callback_data: GetBuildingCallBack,

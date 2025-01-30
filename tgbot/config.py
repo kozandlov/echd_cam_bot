@@ -34,9 +34,8 @@ class Camera:
         return [
             Camera(
                 name=section,
-                address=config_parser.options(section)[0],
-                ip_address=config_parser.get(section, [option for option in config_parser.options(section) if
-                                                       option != 'login' and option != 'password'][0]),
+                address=config_parser.get(section, "address"),
+                ip_address=config_parser.get(section, 'ip'),
                 login=config_parser.get(section, "login"),
                 password=config_parser.get(section, "password")
             )
@@ -48,7 +47,8 @@ class Camera:
         config_parser.read("config.ini")
         if f"{self.name}" not in config_parser.sections():
             config_parser.add_section(f"{self.name}")
-        config_parser.set(section=f"{self.name}", option=self.address, value=self.ip_address)
+        config_parser.set(section=f"{self.name}", option='address', value=self.address)
+        config_parser.set(section=f"{self.name}", option='ip', value=self.ip_address)
         config_parser.set(section=f"{self.name}", option='login', value=self.login)
         config_parser.set(section=f"{self.name}", option='password', value=self.password)
         with open("config.ini", 'w') as configfile:
