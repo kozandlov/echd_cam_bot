@@ -6,7 +6,7 @@ from magic_filter import F
 from ... import config
 from ...config import Building, Camera
 from ...keyboards import get_cameras_for_building_keyboard, GetBuildingCallBack, get_approve_add_keyboard, \
-    ApproveCallback, ApproveAction
+    ApproveCallback, ApproveAction, GetBuildingCamerasCallback
 from ...states import AddCameraState, DeleteCameraState
 
 cameras_router = Router()
@@ -180,7 +180,6 @@ async def get_password_for_new_camera(message: Message, bot: Bot, state: FSMCont
 @cameras_router.callback_query(AddCameraState.finish, ApproveCallback.filter(F.action == ApproveAction.approve))
 async def get_approval_for_new_camera(call: CallbackQuery,
                                       state: FSMContext,
-                                      callback_data: ApproveCallback,
                                       bot: Bot):
     building_address = (await state.get_data()).get('building_address')
     building = [building for building in config.buildings if building.address == building_address][0]
@@ -207,7 +206,6 @@ async def get_approval_for_new_camera(call: CallbackQuery,
 @cameras_router.callback_query(AddCameraState.finish, ApproveCallback.filter(F.action == ApproveAction.decline))
 async def get_decline_for_new_camera(call: CallbackQuery,
                                      state: FSMContext,
-                                     callback_data: ApproveCallback,
                                      bot: Bot):
     await bot.delete_message(
         chat_id=call.message.chat.id,
@@ -217,7 +215,7 @@ async def get_decline_for_new_camera(call: CallbackQuery,
 
 
 @cameras_router.message(DeleteCameraState.get_building)
-async def get_address_for_new_camera(message: Message, bot: Bot, state: FSMContext):
+async def get_address_for_delete_camera(message: Message, bot: Bot, state: FSMContext):
     building_address = message.text
     await bot.delete_message(
         chat_id=message.chat.id,
@@ -245,3 +243,90 @@ async def get_address_for_new_camera(message: Message, bot: Bot, state: FSMConte
             'building_address': building.address,
         }
     )
+
+
+@cameras_router.callback_query(DeleteCameraState.get_building, GetBuildingCallBack.filter())
+async def get_address_for_delete_camera(call: CallbackQuery,
+                                        state: FSMContext,
+                                        callback_data: GetBuildingCallBack,
+                                        bot: Bot):
+    building_address = callback_data.address
+    building = [building for building in config.buildings if building.address == building_address][0]
+    edited_message = await bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=(await state.get_data()).get('edited_message'),
+        text='Укажите камеру для удаления',
+        reply_markup=None if building.cameras is [] else get_cameras_for_building_keyboard(building)
+    )
+    await state.set_state(DeleteCameraState.get_camera)
+    await state.set_data(
+        {
+            'edited_message': edited_message.message_id,
+            'building_address': building.address,
+        }
+    )
+
+
+@cameras_router.callback_query(DeleteCameraState.get_camera, GetBuildingCamerasCallback.filter())
+async def get_camera_name_for_delete_camera(call: CallbackQuery,
+                                            state: FSMContext,
+                                            callback_data: GetBuildingCamerasCallback,
+                                            bot: Bot):
+    building_address = (await state.get_data()).get('building_address')
+    building = [building for building in config.buildings if building.address == building_address][0]
+    camera_name = callback_data.camera_name
+    camera = [camera for camera in building.cameras if camera.name == camera_name][0]
+    edited_message = await bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=(await state.get_data()).get('edited_message'),
+        text='\n'.join(
+            [
+                'Подтвердите удаление камеры со следующими данными',
+                '',
+                f'Адрес {building_address}',
+                f'Имя камеры {camera_name}',
+                f'IP камеры {camera.ip_address}',
+                f'Логин {camera.login}',
+                f'Пароль {camera.password}'
+            ]
+        ),
+        reply_markup=get_approve_add_keyboard()
+    )
+    await state.set_state(DeleteCameraState.finish)
+    await state.set_data(
+        {
+            'edited_message': edited_message.message_id,
+            'building_address': building.address,
+            'camera_name': camera.name,
+        }
+    )
+
+
+@cameras_router.callback_query(DeleteCameraState.finish, ApproveCallback.filter())
+async def get_camera_approve_for_delete_camera(call: CallbackQuery,
+                                               state: FSMContext,
+                                               callback_data: ApproveCallback,
+                                               bot: Bot):
+    if callback_data.action == ApproveAction.decline:
+        await bot.delete_message(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id
+        )
+        await state.clear()
+    else:
+        building_address = (await state.get_data()).get('building_address')
+        camera_name = (await state.get_data()).get('camera_name')
+        building = [building for building in config.buildings if building.address == building_address][0]
+        camera = [camera for camera in building.cameras if camera.name == camera_name][0]
+        camera.delete_from_conf()
+        if len(building.cameras) == 0:
+            config.buildings.remove(building)
+        building.cameras.remove(camera)
+        await bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=None,
+            text='Указанная камера удалена'
+        )
+        await state.clear()
+

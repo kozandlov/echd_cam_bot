@@ -53,6 +53,12 @@ async def delete_camera(message: Message, bot: Bot, state: FSMContext):
         chat_id=message.chat.id,
         message_id=message.message_id
     )
+    if len(config.buildings) == 0:
+        await message.answer(
+            text='Я еще не знаю ни об одной камере',
+            reply_markup=None
+        )
+        return
     edited_message = await message.answer(
         text='Введите адрес здания или выберите из существующих',
         reply_markup=None if config.buildings is [] else get_address_keyboard()

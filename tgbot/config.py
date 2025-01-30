@@ -54,6 +54,14 @@ class Camera:
         with open("config.ini", 'w') as configfile:
             config_parser.write(configfile)
 
+    def delete_from_conf(self):
+        config_parser = ConfigParser()
+        config_parser.read("config.ini")
+        config_parser.remove_section(f"{self.name}")
+        with open("config.ini", 'w') as configfile:
+            config_parser.write(configfile)
+
+
 
 @dataclass
 class Building:
